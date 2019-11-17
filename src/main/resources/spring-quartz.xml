@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
+    <bean id="testJob" class="base.Job"></bean>
+    <bean id="testJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 指定任务类 -->
+        <property name="targetObject" ref="testJob" />
+        <!-- 指定任务执行的方法 -->
+        <property name="targetMethod" value="schedulerJob" />
+    </bean>
+    <bean id="testJobTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="testJobDetail" />
+        <!-- 每10秒运行一次 -->
+        <property name="cronExpression" value="0/10 * * * * ?" />
+    </bean>
+    <bean name="testScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="testJobTrigger" />
+            </list>
+        </property>
+    </bean>
+    <bean name="jobInit" class="base.JobInit" init-method="init" depends-on="testScheduler">
+        <property name="scheduler" ref="testScheduler"/>
+    </bean>
+</beans>
