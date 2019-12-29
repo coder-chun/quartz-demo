@@ -5,14 +5,8 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.quartz.impl.triggers.CronTriggerImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 import java.text.ParseException;
 
 @Component

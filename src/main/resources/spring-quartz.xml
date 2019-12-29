@@ -1,25 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd
-       http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
-    <bean id="testJob" class="base.Job"></bean>
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/quartz?useSSL=false&amp;serverTimezone=UTC"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+    </bean>
+    <!--
+        持久化到数据库时，会发生序列化异常
+        Unable to serialize JobDataMap for insertion into database because the value of property 'methodInvoker' is not serializable: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+        需要将MethodInvokingJobDetailFactoryBean改为JobDetailFactoryBean，并且定时任务类需要继承org.springframework.scheduling.quartz.QuartzJobBean
+        -->
+    <!-- <bean id="testJob" class="base.Job"/>
+
     <bean id="testJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <!-- 指定任务类 -->
-        <property name="targetObject" ref="testJob" />
-        <!-- 指定任务执行的方法 -->
-        <property name="targetMethod" value="schedulerJob" />
+      &lt;!&ndash; 指定任务类 &ndash;&gt;
+      <property name="targetObject" ref="testJob" />
+      &lt;!&ndash; 指定任务执行的方法 &ndash;&gt;
+      <property name="targetMethod" value="schedulerJob" />
+    </bean>-->
+    <bean id="testJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="base.Job"/>
+        <property name="name" value="testJob"/>
     </bean>
     <bean id="testJobTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="testJobDetail" />
         <!-- 每10秒运行一次 -->
-        <property name="cronExpression" value="0/10 * * * * ?" />
+        <property name="cronExpression" value="0 0/10 * * * ?" />
     </bean>
     <bean name="testScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
         <property name="triggers">
             <list>
                 <ref bean="testJobTrigger" />
